@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gfirebro-cmyk.github.io/melod-growth-website/sitemap.xml
