@@ -1,0 +1,49 @@
+name: Improve SEO content
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  seo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add SEO image and content
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          marker = '<!-- MELOD SEO ENHANCEMENTS -->'
+          if marker not in s:
+              hero_anchor = '<div class="hero-art">'
+              image = '<img class="seo-growth-image" src="seo-growth-visual.svg" alt="Melod Growth performance marketing dashboard showing leads, reach, ROI and an upward growth chart" width="1200" height="630" loading="eager" decoding="async">'
+              if hero_anchor in s:
+                  s = s.replace(hero_anchor, hero_anchor + image, 1)
+
+              seo_block = '''\n<!-- MELOD SEO ENHANCEMENTS -->\n<section id="growth-services" aria-labelledby="growth-services-title">\n<div class="wrap">\n<div class="kicker">Growth solutions</div>\n<h2 id="growth-services-title" class="title">A practical growth system built around your business.</h2>\n<p class="muted">Melod Growth combines strategy, creative execution, performance marketing, search visibility and automation to help businesses build a stronger pipeline. We start by understanding the offer, audience, market and customer journey. Then we build a clear plan that connects attention to action.</p>\n<div class="services">\n<article class="card"><span class="num">01 / STRATEGY</span><h3>Research & Positioning</h3><p>We clarify your audience, offer, competitors and message so every campaign starts with a strong commercial foundation.</p></article>\n<article class="card"><span class="num">02 / ACQUISITION</span><h3>Performance Marketing</h3><p>Google Ads and Meta Ads are planned around useful business outcomes such as qualified enquiries, bookings, sales and repeat demand.</p></article>\n<article class="card"><span class="num">03 / VISIBILITY</span><h3>SEO & Local Growth</h3><p>We improve search visibility with useful content, local optimization and technical foundations that help customers discover your business.</p></article>\n<article class="card"><span class="num">04 / BRAND</span><h3>Content & Creative</h3><p>From social content to video and campaign creative, we turn your positioning into communication that is clear, credible and consistent.</p></article>\n<article class="card"><span class="num">05 / AUTOMATION</span><h3>AI Growth Systems</h3><p>We identify repetitive marketing and lead-management tasks that can be streamlined with practical AI and automation workflows.</p></article>\n<article class="card"><span class="num">06 / OPTIMIZATION</span><h3>Measure & Improve</h3><p>Campaigns are reviewed against meaningful metrics so budget, creative, targeting and landing-page decisions can improve over time.</p></article>\n</div>\n<div class="intro" style="margin-top:70px">\n<div class="kicker">Frequently asked questions</div>\n<h2 class="title">What does a growth partner actually do?</h2>\n<p class="muted"><strong>Do you only run ads?</strong> No. Paid media works best when the brand, offer, landing experience and follow-up process are aligned. <strong>Can you work with a small local business?</strong> Yes. The same growth principles can be scaled to local campaigns, regional businesses and larger acquisition programs. <strong>How do you measure success?</strong> We focus on the business goal first—qualified leads, enquiries, appointments, sales or other agreed outcomes—and use campaign data to improve the system. <strong>Do you provide ongoing support?</strong> Yes. Growth is treated as an iterative process: research, launch, measure, learn and optimize.</p>\n</div>\n</div>\n</section>\n'''
+              s = s.replace('<footer>', seo_block + '\n<footer>', 1)
+
+              style = '.seo-growth-image{display:block;width:min(100%,520px);height:auto;margin:0 auto 24px;border:1px solid #193b50;box-shadow:18px 20px 0 rgba(7,27,43,.08)}\n'
+              s = s.replace('</style>', style + '</style>', 1)
+              p.write_text(s, encoding='utf-8')
+
+      - name: Commit SEO improvements
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "Improve image accessibility and SEO content"
+            git push
+          fi
