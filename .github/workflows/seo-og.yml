@@ -1,0 +1,41 @@
+name: SEO Open Graph
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  add-og-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Open Graph image tags
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '<meta property="og:image"'
+          if marker not in s:
+              anchor = '<meta property="og:url" content="https://melodgrowth.cc.cd/">'
+              tags = '''<meta property="og:image" content="https://melodgrowth.cc.cd/og-image.svg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="Melod Growth — We help you get more clients">'''
+              s = s.replace(anchor, anchor + '\n' + tags)
+          twitter_image = '<meta name="twitter:image"'
+          if twitter_image not in s:
+              anchor = '<meta name="twitter:description" content="Research. Strategy. Marketing. Growth."\n>'
+              tags = '<meta name="twitter:image" content="https://melodgrowth.cc.cd/og-image.svg">'
+              s = s.replace(anchor, anchor + '\n' + tags)
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit SEO metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add Open Graph social preview metadata"
+          git push
